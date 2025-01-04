@@ -1,44 +1,19 @@
-'use client';
-
-import { useToast } from '@chakra-ui/react';
 import { useState } from 'react';
 
-function ExampleComponent() {
-  const toast = useToast();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+interface ToastOptions {
+  title: string;
+  description?: string;
+  variant?: 'default' | 'success' | 'error' | 'destructive';
+}
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Your login logic here
+export default function useToast() {
+  const [toast, setToast] = useState<ToastOptions | null>(null);
 
-    // On success
-    toast({
-      title: 'Login successful.',
-      description: "You've successfully logged in.",
-      status: 'success',
-      duration: 5000,
-      isClosable: true,
-    });
-
-    // On error
-    toast({
-      title: 'An error occurred.',
-      description: 'Unable to login. Please try again.',
-      status: 'error',
-      duration: 5000,
-      isClosable: true,
-    });
+  const showToast = (options: ToastOptions) => {
+    setToast(options);
+    setTimeout(() => setToast(null), 3000); // Clear the toast after 3 seconds
   };
 
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* Your form fields */}
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-      />
-      <input
-       
+  return { toast, showToast };
+}
+
