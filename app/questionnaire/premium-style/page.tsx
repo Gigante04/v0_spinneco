@@ -12,7 +12,7 @@ import Link from 'next/link'
 const premiumStyleQuestions = [
   {
     id: 'morning-routine',
-    question: 'When you wake up and get ready, what's your first style thought?',
+    question: 'When you wake up and get ready, what\'s your first style thought?',
     options: [
       'Check the weather and plan accordingly',
       'Whatever feels right in the moment',
@@ -29,11 +29,14 @@ export default function PremiumStyleQuiz() {
   const router = useRouter()
 
   useEffect(() => {
-    const points = localStorage.getItem('userPoints')
-    if (!points || parseInt(points) < 100) {
-      router.push('/questionnaire')
+    if (typeof window !== 'undefined') {
+      const points = localStorage.getItem('userPoints')
+      if (!points || parseInt(points) < 100) {
+        router.push('/questionnaire')
+      } else {
+        setUserPoints(parseInt(points))
+      }
     }
-    setUserPoints(parseInt(points || '0'))
   }, [router])
 
   return (
