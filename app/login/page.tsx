@@ -1,68 +1,69 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Header } from '@/components/header'
-import { Footer } from '@/components/footer'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { toast } from '@/components/ui/use-toast'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import useToast from '@/components/ui/use-toast';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast, showToast } = useToast();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('token', data.token)
-        toast({
-          title: "Login Successful",
-          description: "Welcome back to SPINNECO!",
-        })
-        
-        // Check for redirect URL
-        const redirectUrl = localStorage.getItem('redirectUrl')
+        localStorage.setItem('token', data.token);
+        showToast({
+          title: 'Login Successful',
+          description: 'Welcome back to SPINNECO!',
+          variant: 'success',
+        });
+
+        const redirectUrl = localStorage.getItem('redirectUrl');
         if (redirectUrl) {
-          localStorage.removeItem('redirectUrl')
-          router.push(redirectUrl)
+          localStorage.removeItem('redirectUrl');
+          router.push(redirectUrl);
         } else {
-          router.push('/profile')
+          router.push('/profile');
         }
       } else {
-        throw new Error(data.error || 'Login failed')
+        throw new Error(data.error || 'Login failed');
       }
     } catch (error) {
-      console.error('Login error:', error)
-      toast({
-        title: "Login Failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again later.",
-        variant: "destructive",
-      })
+      console.error('Login error:', error);
+      showToast({
+        title: 'Login Failed',
+        description: error instanceof Error ? error.message : 'An unexpected error occurred. Please try again later.',
+        variant: 'destructive',
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -109,6 +110,22 @@ export default function LoginPage() {
           </CardFooter>
         </Card>
       </main>
+
+      {toast && (
+        <div
+          className={`fixed bottom-4 right-4 px-6 py-3 rounded shadow-lg ${
+            toast.variant === 'success'
+              ? 'bg-green-500 text-white'
+              : toast.variant === 'destructive'
+              ? 'bg-red-500 text-white'
+              : 'bg-black text-white'
+          }`}
+        >
+          <strong>{toast.title}</strong>
+          <p>{toast.description}</p>
+        </div>
+      )}
+
       <div className="mt-8 text-center">
         <Link href="/admin/login" className="text-xs text-gray-400 hover:text-gray-300">
           Admin Login
@@ -116,6 +133,5 @@ export default function LoginPage() {
       </div>
       <Footer />
     </div>
-  )
+  );
 }
-
