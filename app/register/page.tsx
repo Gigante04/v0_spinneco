@@ -1,38 +1,57 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import useToast from '@/components/ui/use-toast';
-import Link from 'next/link';
 
 export default function RegisterPage() {
   const { toast, showToast } = useToast();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    // Simulate a register request
     try {
-      // API call here
-      showToast({
-        title: 'Registration Successful',
-        description: 'You have successfully registered!',
-        variant: 'success',
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
       });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Show success toast
+        showToast({
+          title: 'Registration Successful',
+          description: 'You can now log in.',
+          variant: 'success',
+        });
+
+        // Redirect to login page
+        router.push('/login');
+      } else {
+        throw new Error(data.message || 'Registration failed');
+      }
     } catch (error) {
       showToast({
         title: 'Registration Failed',
-        description: 'There was an issue with your registration. Please try again.',
+        description: error instanceof Error ? error.message : 'Something went wrong.',
         variant: 'error',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -81,36 +100,15 @@ export default function RegisterPage() {
                   />
                 </div>
               </div>
-              <Button type="submit" className="w-full mt-6">
-                Register
+              <Button type="submit" className="w-full mt-6" disabled={isLoading}>
+                {isLoading ? 'Registering...' : 'Register'}
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex justify-between">
-            <Link href="/login" className="text-sm text-blue-600 hover:underline">
-              Already have an account? Login
-            </Link>
-          </CardFooter>
         </Card>
       </main>
-
-      {/* Toast Display */}
-      {toast && (
-        <div
-          className={`fixed bottom-4 right-4 px-6 py-3 rounded shadow-lg ${
-            toast.variant === 'success'
-              ? 'bg-green-500 text-white'
-              : toast.variant === 'error'
-              ? 'bg-red-500 text-white'
-              : 'bg-gray-800 text-white'
-          }`}
-        >
-          <strong>{toast.title}</strong>
-          <p>{toast.description}</p>
-        </div>
-      )}
-
       <Footer />
     </div>
   );
 }
+
