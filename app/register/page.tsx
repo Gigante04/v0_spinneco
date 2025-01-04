@@ -1,58 +1,40 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Header } from '@/components/header'
-import { Footer } from '@/components/footer'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { toast } from '@/components/ui/use-toast'
+import { useState } from 'react';
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import useToast from '@/components/ui/use-toast';
+import Link from 'next/link';
 
 export default function RegisterPage() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const { toast, showToast } = useToast();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
 
+    // Simulate a register request
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        toast({
-          title: "Registration Successful",
-          description: "Welcome to SPINNECO! Please log in to continue.",
-        })
-        router.push('/login')
-      } else {
-        throw new Error(data.error || 'Registration failed')
-      }
+      // API call here
+      showToast({
+        title: 'Registration Successful',
+        description: 'You have successfully registered!',
+        variant: 'success',
+      });
     } catch (error) {
-      toast({
-        title: "Registration Failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
+      showToast({
+        title: 'Registration Failed',
+        description: 'There was an issue with your registration. Please try again.',
+        variant: 'error',
+      });
     }
-  }
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -60,17 +42,17 @@ export default function RegisterPage() {
       <main className="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">Create a SPINNECO Account</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Register</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleRegister}>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="name">Name</Label>
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Enter your full name"
+                    placeholder="Enter your name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -92,26 +74,43 @@ export default function RegisterPage() {
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Create a password"
+                    placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                 </div>
               </div>
-              <Button type="submit" className="w-full mt-6" disabled={isLoading}>
-                {isLoading ? 'Creating Account...' : 'Create Account'}
+              <Button type="submit" className="w-full mt-6">
+                Register
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex justify-center">
-            <span>Already have an account? </span>
-            <a href="/login" className="text-blue-600 hover:underline ml-1">Log in</a>
+          <CardFooter className="flex justify-between">
+            <Link href="/login" className="text-sm text-blue-600 hover:underline">
+              Already have an account? Login
+            </Link>
           </CardFooter>
         </Card>
       </main>
+
+      {/* Toast Display */}
+      {toast && (
+        <div
+          className={`fixed bottom-4 right-4 px-6 py-3 rounded shadow-lg ${
+            toast.variant === 'success'
+              ? 'bg-green-500 text-white'
+              : toast.variant === 'error'
+              ? 'bg-red-500 text-white'
+              : 'bg-gray-800 text-white'
+          }`}
+        >
+          <strong>{toast.title}</strong>
+          <p>{toast.description}</p>
+        </div>
+      )}
+
       <Footer />
     </div>
-  )
+  );
 }
-
