@@ -1,19 +1,22 @@
 import { useState } from 'react';
 
-/**
- * useToast - A custom hook for managing toast notifications.
- */
+interface ToastOptions {
+  title: string;
+  description?: string;
+  variant?: 'default' | 'success' | 'error' | 'destructive';
+}
+
 export default function useToast() {
-  const [toastMessage, setToastMessage] = useState<string | null>(null); // State to manage the toast message
+  const [toast, setToast] = useState<ToastOptions | null>(null);
 
   /**
-   * showToast - Function to display a toast message.
-   * @param message - The message to display in the toast.
+   * showToast - Function to display a toast with options.
+   * @param options - Object containing title, description, and variant.
    */
-  const showToast = (message: string) => {
-    setToastMessage(message); // Set the toast message
-    setTimeout(() => setToastMessage(null), 3000); // Clear the toast after 3 seconds
+  const showToast = (options: ToastOptions) => {
+    setToast(options);
+    setTimeout(() => setToast(null), 3000); // Clear the toast after 3 seconds
   };
 
-  return { toastMessage, showToast }; // Return the state and the function
+  return { toast, showToast };
 }
